@@ -26,14 +26,15 @@ public class Video {
     {
         if (uri != "")
         {
-            if (uri.matches("(^www\\.)?([A-Z]|[a-z])+([\\-\\.]{1}[a-z0-9]+)*[.]([a-z]){2,5}"))
-            {
+            /*if (uri.matches("(^www\\.)?([A-Z]|[a-z])+([\\-\\.]{1}[a-z0-9]+)*[.]([a-z]){2,5}"))
+            { */
                 this.uri = Uri.parse(uri);
-            }
+            /*}
             else
             {
                 throw new IllegalArgumentException("Uri is invalid!");
             }
+            */
         }
         else {
             throw new IllegalArgumentException("Uri is empty!");

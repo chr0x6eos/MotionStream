@@ -21,7 +21,7 @@
     <VideoView
         android:id="@+id/videoFeed"
         android:layout_width="364dp"
-        android:layout_height="570dp"
+        android:layout_height="485dp"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
         android:layout_marginTop="12dp"
