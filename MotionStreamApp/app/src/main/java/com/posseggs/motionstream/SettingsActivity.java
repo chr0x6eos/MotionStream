@@ -29,7 +29,7 @@ public class SettingsActivity extends AppCompatActivity {
     {
         try
         {
-            MainActivity.video.setUri(editUriText.getText().toString());
+            //MainActivity.video.setUri(editUriText.getText().toString());
             Intent i = new Intent();
             setResult(RESULT_OK,i);
             finish();
