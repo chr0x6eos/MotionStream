@@ -1,16 +1,13 @@
 package com.posseggs.motionstream;
 
 import android.content.Intent;
-import android.media.MediaPlayer;
-import android.net.Uri;
+import android.content.SharedPreferences;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
-import android.widget.VideoView;
 
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
@@ -27,11 +24,16 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 
 public class MainActivity extends AppCompatActivity
 {
-
     public static final int REQUEST_CODE_SETTINGS = 12318;
+    public static final String KEY_URI = "KEY_URI";
+    public static final String KEY_PLAY = "KEY_PLAY";
+    private static final String KEY_SP = "KEY_SP";
 
     //The live stream will be displayed in the video view
-    String path = "rtmp://184.72.239.149/vod/mp4:bigbuckbunny_1500.mp4";
+    PlayerView playerView;
+
+    //The player that manages the video stream
+    SimpleExoPlayer player;
 
     public static Video video; //The video obj will store all needed attributes
 
@@ -40,10 +42,12 @@ public class MainActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         try
         {
-            video = new Video(path);
+            playerView = findViewById(R.id.player);
+            video = new Video();
+            loadPreferences(); //Load from previous settings
+            startStream();
         }
         catch (Exception ex)
         {
@@ -68,23 +72,55 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == REQUEST_CODE_SETTINGS && resultCode == RESULT_OK)
         {
-            Toast.makeText(this, video.getUri().toString(),Toast.LENGTH_LONG).show();
+            savePreferences();
+            startStream();
+            //Toast.makeText(this, video.getUri().toString(),Toast.LENGTH_LONG).show();
         }
     }
 
-    public void startFeed()
+    private void loadPreferences()
     {
+        SharedPreferences sp = getSharedPreferences(KEY_SP,MODE_PRIVATE);
 
-        try {
-            //initiate Player
-            //Create a default TrackSelector
-            BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-            TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
-            TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+        //Set addresses from the shared Preferences
+        video.setAutoplay(sp.getBoolean(KEY_PLAY,true));
+        video.setUri(sp.getString(KEY_URI, "rtmp://184.72.239.149/vod/mp4:bigbuckbunny_1500.mp4"));
+    }
 
-            //Create the player
-            SimpleExoPlayer player = ExoPlayerFactory.newSimpleInstance(this, trackSelector);
-            PlayerView playerView = findViewById(R.id.simple_player);
+    //Save the addresses to the shared preferences
+    public void savePreferences()
+    {
+        //Setup sp
+        SharedPreferences sp = getSharedPreferences(KEY_SP,MODE_PRIVATE);
+        SharedPreferences.Editor sp_editor = sp.edit();
+
+        //Save to editor
+        if (video != null)
+        {
+            sp_editor.putString(KEY_URI, video.getUri().toString());
+            sp_editor.putBoolean(KEY_PLAY,video.getAutoplay());
+            //Apply changes
+            sp_editor.apply();
+        }
+    }
+
+    private SimpleExoPlayer initStream()
+    {
+        //initiate Player
+        //Create a default TrackSelector
+        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+        TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
+        TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+
+        //Create the player
+        return player = ExoPlayerFactory.newSimpleInstance(this, trackSelector);
+    }
+
+    //Functions for stream
+    public void showStream()
+    {
+        try
+        {
             playerView.setPlayer(player);
 
             RtmpDataSourceFactory rtmpDataSourceFactory = new RtmpDataSourceFactory();
@@ -95,8 +131,7 @@ public class MainActivity extends AppCompatActivity
             // Prepare the player with the source.
             player.prepare(videoSource);
             //auto start playing
-            player.setPlayWhenReady(true);
-
+            player.setPlayWhenReady(video.getAutoplay());
         }
         catch (Exception ex)
         {
@@ -104,19 +139,9 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void stopFeed()
+    public void startStream()
     {
-
-    }
-
-    public void start_onClick(View v)
-    {
-        startFeed();
-        Toast.makeText(this,"Started video feed " + video.getUri().toString() ,Toast.LENGTH_LONG).show();
-    }
-
-    public void stop_onClick(View v)
-    {
-        stopFeed();
+        player = initStream();
+        showStream();
     }
 }
