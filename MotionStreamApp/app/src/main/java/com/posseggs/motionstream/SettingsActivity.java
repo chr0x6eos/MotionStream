@@ -14,7 +14,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     EditText editUriText;
     Switch editSwitch;
-    String uri;
+    Boolean autoplay = true; //Default on true
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,8 +27,10 @@ public class SettingsActivity extends AppCompatActivity {
         {
             if (MainActivity.video != null)
             {
-                if (MainActivity.video.getAutoplay() != null)
+                if (MainActivity.video.getAutoplay() != null) {
                     editSwitch.setChecked(MainActivity.video.getAutoplay());
+                    autoplay = MainActivity.video.getAutoplay();
+                }
                 if (MainActivity.video.getUri() != null && MainActivity.video.getUri().toString() != "")
                     editUriText.setText(MainActivity.video.getUri().toString());
             }
@@ -40,9 +42,9 @@ public class SettingsActivity extends AppCompatActivity {
         editSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked)
-                    MainActivity.video.setAutoplay(true);
-                 else
-                    MainActivity.video.setAutoplay(false);
+                    autoplay = true;
+                else
+                    autoplay = false;
             }
         });
     }
@@ -56,9 +58,11 @@ public class SettingsActivity extends AppCompatActivity {
     {
         try
         {
+            //Apply settings
             MainActivity.video.setUri(editUriText.getText().toString());
+            MainActivity.video.setAutoplay(autoplay);
             Intent i = new Intent();
-            setResult(RESULT_OK,i);
+            setResult(RESULT_OK, i);
             finish();
         }
         catch (Exception ex)

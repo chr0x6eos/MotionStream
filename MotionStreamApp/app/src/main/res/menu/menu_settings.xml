@@ -7,5 +7,6 @@
         app:showAsAction="withText"
         android:onClick="apply_onClick"/>
 
-    <item android:title="Cancel" />
+    <item android:title="Cancel"
+        android:onClick="cancel_onClick"/>
 </menu>

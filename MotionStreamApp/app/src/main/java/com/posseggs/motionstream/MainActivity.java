@@ -70,11 +70,17 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == REQUEST_CODE_SETTINGS && resultCode == RESULT_OK)
+        if (requestCode == REQUEST_CODE_SETTINGS)
         {
-            savePreferences();
-            startStream();
-            //Toast.makeText(this, video.getUri().toString(),Toast.LENGTH_LONG).show();
+            if (resultCode == RESULT_OK) {
+                savePreferences();
+                startStream();
+                //Toast.makeText(this, video.getUri().toString(),Toast.LENGTH_LONG).show();
+            }
+            else
+            {
+                Toast.makeText(this, "Applying settings was canceled!", Toast.LENGTH_LONG).show();
+            }
         }
     }
 
@@ -87,7 +93,7 @@ public class MainActivity extends AppCompatActivity
         video.setUri(sp.getString(KEY_URI, "rtmp://184.72.239.149/vod/mp4:bigbuckbunny_1500.mp4"));
     }
 
-    //Save the addresses to the shared preferences
+    //Save the settings to the shared preferences
     public void savePreferences()
     {
         //Setup sp
@@ -141,6 +147,7 @@ public class MainActivity extends AppCompatActivity
 
     public void startStream()
     {
+        //Starting stream by initialising player and then starting video stream
         player = initStream();
         showStream();
     }
