@@ -13,23 +13,36 @@ import android.widget.Toast;
 public class SettingsActivity extends AppCompatActivity {
 
     EditText editUriText;
-    Switch editSwitch;
+    Switch editSwitchAuto;
+    Switch editSwitchPush;
     Boolean autoplay = true; //Default on true
+    Boolean notify = true; //Default on true
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         editUriText = findViewById(R.id.editTextURI);
-        editSwitch = findViewById(R.id.switchAutoplay);
+        editSwitchAuto = findViewById(R.id.switchAutoplay);
+        editSwitchPush = findViewById(R.id.switchPushNotification);
 
+        //Set default values
+        editSwitchAuto.setChecked(autoplay);
+        editSwitchPush.setChecked(notify);
+
+        //Check if there already are valid settings
         try
         {
             if (MainActivity.video != null)
             {
                 if (MainActivity.video.getAutoplay() != null) {
-                    editSwitch.setChecked(MainActivity.video.getAutoplay());
+                    editSwitchAuto.setChecked(MainActivity.video.getAutoplay());
                     autoplay = MainActivity.video.getAutoplay();
+                }
+                if (MainActivity.video.getNotify() != null)
+                {
+                    editSwitchPush.setChecked(MainActivity.video.getNotify());
+                    notify = MainActivity.video.getNotify();
                 }
                 if (MainActivity.video.getUri() != null && MainActivity.video.getUri().toString() != "")
                     editUriText.setText(MainActivity.video.getUri().toString());
@@ -39,12 +52,23 @@ public class SettingsActivity extends AppCompatActivity {
         {
             Toast.makeText(this,"Error! No default settings exists!",Toast.LENGTH_LONG).show();
         }
-        editSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+        //Change Booleans when alternating switch
+        editSwitchAuto.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked)
                     autoplay = true;
                 else
                     autoplay = false;
+            }
+        });
+
+        editSwitchPush.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked)
+                    notify = true;
+                else
+                    notify = false;
             }
         });
     }
@@ -61,6 +85,7 @@ public class SettingsActivity extends AppCompatActivity {
             //Apply settings
             MainActivity.video.setUri(editUriText.getText().toString());
             MainActivity.video.setAutoplay(autoplay);
+            MainActivity.video.setNotify(notify);
             Intent i = new Intent();
             setResult(RESULT_OK, i);
             finish();
@@ -73,6 +98,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     public void cancel_onClick(MenuItem menu)
     {
+        //Chancel settings
         Intent i = new Intent();
         setResult(RESULT_CANCELED);
         finish();

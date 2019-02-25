@@ -6,6 +6,7 @@ public class Video {
 
     private Uri uri;
     private Boolean autoplay;
+    private Boolean notify;
 
     public Video()
     {
@@ -13,12 +14,13 @@ public class Video {
         //setUri("rtmp://184.72.239.149/vod/mp4:bigbuckbunny_1500.mp4");
     }
 
-    public Video(String uri, Boolean autoplay)
+    public Video(String uri, Boolean autoplay, Boolean notify)
     {
         try
         {
             setUri(uri);
             setAutoplay(autoplay);
+            setNotify(notify);
         }
         catch (Exception ex)
         {
@@ -26,7 +28,8 @@ public class Video {
         }
     }
 
-    public Uri getUri() {
+    public Uri getUri()
+    {
         return uri;
     }
 
@@ -49,7 +52,8 @@ public class Video {
         }
     }
 
-    public Boolean getAutoplay() {
+    public Boolean getAutoplay()
+    {
         return autoplay;
     }
 
@@ -59,5 +63,17 @@ public class Video {
             this.autoplay = autoplay;
         else
             throw new IllegalArgumentException("Invalid autoplay!");
+    }
+
+    public Boolean getNotify()
+    {
+        return notify;
+    }
+
+    public void setNotify(Boolean notify) {
+        if (notify == true || notify == false)
+            this.notify = notify;
+        else
+            throw new IllegalArgumentException("Invalid notify!");
     }
 }
