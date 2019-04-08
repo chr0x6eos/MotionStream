@@ -24,15 +24,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:paddingTop="4dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingTop="4dp">
 
-        <ImageButton android:id="@id/exo_play"
-            style="@style/ExoMediaButton.Play"/>
+        <ImageButton
+            android:id="@id/exo_play"
+            style="@style/ExoMediaButton.Play" />
 
-        <ImageButton android:id="@id/exo_pause"
-            style="@style/ExoMediaButton.Pause"/>
-
+        <ImageButton
+            android:id="@id/exo_pause"
+            style="@style/ExoMediaButton.Pause" />
     </LinearLayout>
 
     <LinearLayout
@@ -42,6 +43,7 @@
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
+        <!-- Commented out because no time is nee
         <TextView android:id="@id/exo_position"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -56,8 +58,7 @@
             android:id="@id/exo_progress"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_height="26dp"/>
+            android:layout_height="26dp"/> -->
 
     </LinearLayout>
-
 </LinearLayout>

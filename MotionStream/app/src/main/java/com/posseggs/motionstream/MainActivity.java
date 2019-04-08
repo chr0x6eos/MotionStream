@@ -7,10 +7,12 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -18,6 +20,8 @@ import android.widget.Toast;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.ext.rtmp.RtmpDataSourceFactory;
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
+import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
@@ -28,6 +32,10 @@ import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+
 public class MainActivity extends AppCompatActivity
 {
     //Codes and identifiers
@@ -36,10 +44,13 @@ public class MainActivity extends AppCompatActivity
     private static final String KEY_URI = "KEY_URI";
     private static final String KEY_PLAY = "KEY_PLAY";
     private static final String KEY_PUSH = "KEY_PUSH";
-    public static final String DEF_URI = "rtmp://184.72.239.149/vod/mp4:bigbuckbunny_1500.mp4";
+    public static final String DEF_URI = "rtmp://172.18.202.202:1935/live/test";
 
     //The live stream will be displayed in the video view
     PlayerView playerView;
+
+    //MqttHelper for managing server-client messaging
+    MqttHelper mqttHelper;
 
     //The player that manages the video stream
     SimpleExoPlayer player;
@@ -56,12 +67,43 @@ public class MainActivity extends AppCompatActivity
             playerView = findViewById(R.id.player);
             video = new Video();
             loadPreferences(); //Load from previous settings
+            startMqtt();
             startStream(); //Start stream if autoplay is enabled
         }
         catch (Exception ex)
         {
             Toast.makeText(this, ex.getMessage(),Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void startMqtt() {
+        mqttHelper = new MqttHelper(getApplicationContext());
+        mqttHelper.setCallback(new MqttCallbackExtended() {
+            @Override
+            public void connectComplete(boolean b, String s) {
+
+            }
+
+            @Override
+            public void connectionLost(Throwable throwable) {
+
+            }
+
+            @Override
+            public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
+                Log.w("Debug", mqttMessage.toString());
+                //For now not needed
+                String notificationMessage = mqttMessage.toString();
+                //if (notificationMessage == "Stream1")
+                showNotification("Attention: Motion has been detected!","Press here to access the stream!" +
+                        " MQTT message: " + notificationMessage);
+            }
+
+            @Override
+            public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
+
+            }
+        });
     }
 
     @Override
@@ -124,6 +166,13 @@ public class MainActivity extends AppCompatActivity
 
     private SimpleExoPlayer initStream()
     {
+        //Release player if one exists currently
+        if (player != null)
+        {
+            player.release();
+        }
+        player = null;
+
         //Initiate Player
         //Create a default TrackSelector
         BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
@@ -144,8 +193,11 @@ public class MainActivity extends AppCompatActivity
 
             RtmpDataSourceFactory rtmpDataSourceFactory = new RtmpDataSourceFactory();
             // This is the MediaSource representing the media to be played.
-            MediaSource videoSource = new ExtractorMediaSource.Factory(rtmpDataSourceFactory)
-                    .createMediaSource(video.getUri());
+            //MediaSource videoSource = new ExtractorMediaSource.Factory(rtmpDataSourceFactory).createMediaSource(video.getUri());
+
+            //Other possible solution
+            ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+            MediaSource videoSource = new ExtractorMediaSource(Uri.parse(video.getUri().toString()+ " live=1 buffer=1000"),rtmpDataSourceFactory,extractorsFactory,null,null);
 
             // Prepare the player with the source.
             player.prepare(videoSource);
@@ -170,7 +222,7 @@ public class MainActivity extends AppCompatActivity
     // https://stackoverflow.com/questions/48131068/warning-must-be-one-of-notificationmanager-importance
     @SuppressLint("WrongConstant")
     //Showing push notifications
-    private void showNotification(String title, String content)
+    public void showNotification(String title, String content)
     {
         //If notifications are enabled
         if (video.getNotify())
@@ -186,10 +238,10 @@ public class MainActivity extends AppCompatActivity
             }
 
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext(), "default")
-                    .setSmallIcon(R.mipmap.ic_launcher) // notification icon
-                    .setContentTitle(title) // title for notification
-                    .setContentText(content)// message for notification
-                    .setAutoCancel(true); // clear notification after click
+                    .setSmallIcon(R.mipmap.ic_launcher) // Notification icon
+                    .setContentTitle(title) // Title for notification
+                    .setContentText(content)// Message for notification
+                    .setAutoCancel(true); // Clear notification after click
 
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             PendingIntent pi = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
