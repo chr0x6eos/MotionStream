@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -18,6 +19,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -62,7 +64,6 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         surface = findViewById(R.id.surface);
-
         holder = surface.getHolder();
 
         try
@@ -70,7 +71,8 @@ public class MainActivity extends AppCompatActivity
             video = new Video();
             loadPreferences(); //Load from previous settings
             startMqtt();
-            startStream(); //Start stream if autoplay is enabled
+            if (video.getAutoplay())
+                startStream(); //Start stream if autoplay is enabled
         }
         catch (Exception ex)
         {
@@ -142,6 +144,8 @@ public class MainActivity extends AppCompatActivity
     {
         SharedPreferences sp = getSharedPreferences(KEY_SP,MODE_PRIVATE);
 
+
+
         //Set addresses from the shared Preferences
         video.setAutoplay(sp.getBoolean(KEY_PLAY,true));
         video.setNotify(sp.getBoolean(KEY_PUSH,true));
@@ -166,12 +170,12 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
     //Functions for stream
     public void showStream()
     {
         try
         {
+            //Create the player to show stream
             createPlayer(video.getUri().toString());
         }
         catch (Exception ex)
@@ -186,7 +190,8 @@ public class MainActivity extends AppCompatActivity
         showStream();
     }
 
-    /*private void setSize(int width, int height) {
+    private void setSize(int width, int height)
+    {
         mVideoWidth = width;
         mVideoHeight = height;
         if (mVideoWidth * mVideoHeight <= 1)
@@ -213,31 +218,30 @@ public class MainActivity extends AppCompatActivity
             w = (int) (h * videoAR);
 
         holder.setFixedSize(mVideoWidth, mVideoHeight);
-        LayoutParams lp = surface.getLayoutParams();
+        ViewGroup.LayoutParams lp = surface.getLayoutParams();
         lp.width = w;
         lp.height = h;
         surface.setLayoutParams(lp);
         surface.invalidate();
     }
-    */
 
-    private void createPlayer(String media) {
+    private void createPlayer(String media)
+    {
+        //Delete player if exists
         releasePlayer();
-        try {
-            if (media.length() > 0) {
-                Toast toast = Toast.makeText(this, media, Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0,
-                        0);
-                toast.show();
-            }
-
+        try
+        {
             // Create LibVLC
-            // TODO: make this more robust, and sync with audio demo
-            ArrayList<String> options = new ArrayList<String>();
-            //options.add("--subsdec-encoding <encoding>");
+            ArrayList<String> options = new ArrayList<>();
+
+            //Options for stream
             options.add("--aout=opensles");
             options.add("--audio-time-stretch"); // time stretching
             options.add("-vvv"); // verbosity
+            options.add(":network-caching=100");
+            options.add(":clock-jitter=0");
+            options.add("clock-synchro=0");
+
             libvlc = new LibVLC(this, options);
             holder.setKeepScreenOn(true);
 
@@ -245,10 +249,9 @@ public class MainActivity extends AppCompatActivity
             mMediaPlayer = new MediaPlayer(libvlc);
             mMediaPlayer.setEventListener(mPlayerListener);
 
-            // Seting up video output
+            // Setting up video output
             final IVLCVout vout = mMediaPlayer.getVLCVout();
             vout.setVideoView(surface);
-            //vout.setSubtitlesView(mSurfaceSubtitles);
             //vout.addCallback(this);
             vout.attachViews();
 
@@ -256,7 +259,9 @@ public class MainActivity extends AppCompatActivity
             mMediaPlayer.setMedia(m);
             mMediaPlayer.play();
 
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             Toast.makeText(this, "Error in creating player!", Toast
                     .LENGTH_LONG).show();
         }
@@ -279,7 +284,6 @@ public class MainActivity extends AppCompatActivity
 
     private MediaPlayer.EventListener mPlayerListener = new MyPlayerListener(this);
 
-    /*@Override
     public void onNewLayout(IVLCVout vout, int width, int height, int visibleWidth, int visibleHeight, int sarNum, int sarDen) {
         if (width * height == 0)
             return;
@@ -289,7 +293,6 @@ public class MainActivity extends AppCompatActivity
         mVideoHeight = height;
         setSize(mVideoWidth, mVideoHeight);
     }
-    */
 
     private static class MyPlayerListener implements MediaPlayer.EventListener {
         private WeakReference<MainActivity> mOwner;
@@ -308,8 +311,11 @@ public class MainActivity extends AppCompatActivity
                     player.releasePlayer();
                     break;
                 case MediaPlayer.Event.Playing:
+                    Log.d(TAG,"Playing stream");
                 case MediaPlayer.Event.Paused:
+                    Log.d(TAG,"Paused stream");
                 case MediaPlayer.Event.Stopped:
+                    Log.d(TAG,"Stopped stream");
                 default:
                     break;
             }
