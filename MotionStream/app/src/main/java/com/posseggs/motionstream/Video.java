@@ -10,8 +10,7 @@ public class Video {
 
     public Video()
     {
-        //Default uri
-        //setUri("rtmp://184.72.239.149/vod/mp4:bigbuckbunny_1500.mp4");
+
     }
 
     public Video(String uri, Boolean autoplay, Boolean notify)
@@ -47,7 +46,8 @@ public class Video {
             }
             */
         }
-        else {
+        else
+        {
             throw new IllegalArgumentException("Uri is empty!");
         }
     }

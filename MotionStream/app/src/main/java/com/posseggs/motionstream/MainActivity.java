@@ -1,6 +1,7 @@
 package com.posseggs.motionstream;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -13,6 +14,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -42,10 +44,10 @@ public class MainActivity extends AppCompatActivity
     private static final String KEY_URI = "KEY_URI";
     private static final String KEY_PLAY = "KEY_PLAY";
     private static final String KEY_PUSH = "KEY_PUSH";
-    public static final String DEF_URI = "rtmp://172.18.202.202:1935/live/test";
+    public static final String DEF_URI = "rtmp://172.18.202.202:1935/live/test"; //Default path
 
     private SurfaceHolder holder;
-    private LibVLC libvlc;
+    private LibVLC libvlc = null;
     private MediaPlayer mMediaPlayer = null;
     private int mVideoWidth;
     private int mVideoHeight;
@@ -65,6 +67,8 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         surface = findViewById(R.id.surface);
         holder = surface.getHolder();
+
+        //setOrientation();
 
         try
         {
@@ -225,6 +229,24 @@ public class MainActivity extends AppCompatActivity
         surface.invalidate();
     }
 
+    /*private void setOrientation()
+    {
+        //https://stackoverflow.com/questions/14858214/how-to-rotate-video-mp4-in-surfaceview
+
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+        int h = displaymetrics.heightPixels;
+        int w = displaymetrics.widthPixels;
+
+        holder = surface.getHolder();
+
+        if (w > h) {
+            holder.setFixedSize(w,h);
+        } else {
+            holder.setFixedSize(h,w);
+        }
+    }*/
+
     private void createPlayer(String media)
     {
         //Delete player if exists
@@ -284,7 +306,9 @@ public class MainActivity extends AppCompatActivity
 
     private MediaPlayer.EventListener mPlayerListener = new MyPlayerListener(this);
 
-    public void onNewLayout(IVLCVout vout, int width, int height, int visibleWidth, int visibleHeight, int sarNum, int sarDen) {
+    /*
+    public void onNewLayout(IVLCVout vout, int width, int height, int visibleWidth, int visibleHeight, int sarNum, int sarDen)
+    {
         if (width * height == 0)
             return;
 
@@ -293,12 +317,13 @@ public class MainActivity extends AppCompatActivity
         mVideoHeight = height;
         setSize(mVideoWidth, mVideoHeight);
     }
+    */
 
     private static class MyPlayerListener implements MediaPlayer.EventListener {
         private WeakReference<MainActivity> mOwner;
 
         public MyPlayerListener(MainActivity owner) {
-            mOwner = new WeakReference<MainActivity>(owner);
+            mOwner = new WeakReference<>(owner);
         }
 
         @Override
@@ -308,7 +333,7 @@ public class MainActivity extends AppCompatActivity
             switch (event.type) {
                 case MediaPlayer.Event.EndReached:
                     Log.d(TAG, "MediaPlayerEndReached");
-                    player.releasePlayer();
+                    player.releasePlayer(); //Clear player when stream done
                     break;
                 case MediaPlayer.Event.Playing:
                     Log.d(TAG,"Playing stream");
@@ -316,14 +341,15 @@ public class MainActivity extends AppCompatActivity
                     Log.d(TAG,"Paused stream");
                 case MediaPlayer.Event.Stopped:
                     Log.d(TAG,"Stopped stream");
+                    //player.releasePlayer(); //Clear player when stream stopped
+                    //break;
                 default:
                     break;
             }
         }
     }
 
-    // Suppress Lint because of android studio bug:
-    // https://stackoverflow.com/questions/48131068/warning-must-be-one-of-notificationmanager-importance
+    // Suppress Lint because of android studio bug: https://stackoverflow.com/questions/48131068/warning-must-be-one-of-notificationmanager-importance
     @SuppressLint("WrongConstant")
     //Showing push notifications
     public void showNotification(String title, String content)

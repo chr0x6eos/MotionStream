@@ -30,7 +30,7 @@ public class SettingsActivity extends AppCompatActivity {
         editSwitchAuto.setChecked(autoplay);
         editSwitchPush.setChecked(notify);
 
-        //Check if there already are valid settings
+        //Check if there already were settings saved, and set the gui values to these values.
         try
         {
             if (MainActivity.video != null)
@@ -50,10 +50,10 @@ public class SettingsActivity extends AppCompatActivity {
         }
         catch (Exception ex)
         {
-            Toast.makeText(this,"Error! No default settings exists!",Toast.LENGTH_LONG).show();
+            Toast.makeText(this,"Error! No default settings exists!", Toast.LENGTH_LONG).show();
         }
 
-        //Change Booleans when alternating switch
+        //Change Booleans when alternating the switches
         editSwitchAuto.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked)
@@ -62,7 +62,6 @@ public class SettingsActivity extends AppCompatActivity {
                     autoplay = false;
             }
         });
-
         editSwitchPush.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked)
@@ -73,7 +72,8 @@ public class SettingsActivity extends AppCompatActivity {
         });
     }
 
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         getMenuInflater().inflate(R.menu.menu_settings,menu);
         return true;
     }
@@ -82,7 +82,7 @@ public class SettingsActivity extends AppCompatActivity {
     {
         try
         {
-            //Apply settings
+            //Apply settings to the video class and exit the settings tab
             MainActivity.video.setUri(editUriText.getText().toString());
             MainActivity.video.setAutoplay(autoplay);
             MainActivity.video.setNotify(notify);
@@ -98,9 +98,9 @@ public class SettingsActivity extends AppCompatActivity {
 
     public void cancel_onClick(MenuItem menu)
     {
-        //Chancel settings
+        //Chancel settings and exit
         Intent i = new Intent();
-        setResult(RESULT_CANCELED);
+        setResult(RESULT_CANCELED,i);
         finish();
     }
 }

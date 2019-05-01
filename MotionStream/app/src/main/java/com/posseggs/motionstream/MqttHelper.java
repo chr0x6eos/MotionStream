@@ -13,9 +13,12 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+            //Class taken from Darius Hasslauer and modified for this purpose
 public class MqttHelper
 {
         public MqttAndroidClient mqttAndroidClient;
+
+        private static String TAG = "Mqtt";
 
         //ToDO:change stuff here
         final String serverUri = "tcp://172.18.202.202:1883";
@@ -34,17 +37,14 @@ public class MqttHelper
                 @Override
                 public void connectComplete(boolean b, String s)
                 {
-                    Log.w("mqtt", s);
+                    Log.w(TAG, s);
                 }
 
                 @Override
-                public void connectionLost(Throwable throwable) { }
+                public void connectionLost(Throwable throwable) { Log.w(TAG,throwable.getMessage()); }
 
                 @Override
-                public void messageArrived(String topic, MqttMessage mqttMessage)
-                {
-                    Log.w("Mqtt", mqttMessage.toString());
-                }
+                public void messageArrived(String topic, MqttMessage mqttMessage) { Log.w(TAG, mqttMessage.toString()); }
 
                 @Override
                 public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) { }
@@ -86,7 +86,7 @@ public class MqttHelper
                     @Override
                     public void onFailure(IMqttToken asyncActionToken, Throwable exception)
                     {
-                        Log.w("Mqtt", "Failed to connect to: " + serverUri  + " " + exception.toString());
+                        Log.w(TAG, "Failed to connect to: " + serverUri  + " " + exception.toString());
                     }
                 });
 
@@ -108,13 +108,13 @@ public class MqttHelper
                     @Override
                     public void onSuccess(IMqttToken asyncActionToken)
                     {
-                        Log.w("Mqtt","Subscribed!");
+                        Log.w(TAG,"Successfully subscribed!");
                     }
 
                     @Override
                     public void onFailure(IMqttToken asyncActionToken, Throwable exception)
                     {
-                        Log.w("Mqtt", "Subscribing failed!");
+                        Log.w(TAG, "Subscribing failed!");
                     }
                 });
 
