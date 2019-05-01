@@ -68,13 +68,11 @@ public class MainActivity extends AppCompatActivity
         surface = findViewById(R.id.surface);
         holder = surface.getHolder();
 
-        //setOrientation();
-
         try
         {
             video = new Video();
             loadPreferences(); //Load from previous settings
-            startMqtt();
+            startMqtt(); //Start the mqtt service and listen for messages
             if (video.getAutoplay())
                 startStream(); //Start stream if autoplay is enabled
         }
@@ -175,23 +173,17 @@ public class MainActivity extends AppCompatActivity
     }
 
     //Functions for stream
-    public void showStream()
+    public void startStream()
     {
         try
         {
             //Create the player to show stream
-            createPlayer(video.getUri().toString());
+            createPlayer(video.getUri());
         }
         catch (Exception ex)
         {
             Toast.makeText(this, ex.getMessage(),Toast.LENGTH_LONG).show();
         }
-    }
-
-    public void startStream()
-    {
-        //Starting stream by initialising player and then starting video stream
-        showStream();
     }
 
     private void setSize(int width, int height)
@@ -247,7 +239,7 @@ public class MainActivity extends AppCompatActivity
         }
     }*/
 
-    private void createPlayer(String media)
+    private void createPlayer(Uri media)
     {
         //Delete player if exists
         releasePlayer();
@@ -277,7 +269,7 @@ public class MainActivity extends AppCompatActivity
             //vout.addCallback(this);
             vout.attachViews();
 
-            Media m = new Media(libvlc, Uri.parse(media));
+            Media m = new Media(libvlc, media);
             mMediaPlayer.setMedia(m);
             mMediaPlayer.play();
 
