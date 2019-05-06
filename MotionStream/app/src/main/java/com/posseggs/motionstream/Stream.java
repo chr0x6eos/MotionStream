@@ -1,6 +1,5 @@
 package com.posseggs.motionstream;
 
-import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -10,6 +9,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import org.videolan.libvlc.IVLCVout;
 import org.videolan.libvlc.LibVLC;
@@ -27,39 +27,28 @@ public class Stream extends Fragment {
     private MediaPlayer mMediaPlayer = null;
     private int mVideoWidth;
     private int mVideoHeight;
+    TextView text;
 
     public final static String TAG = "Stream";
 
     SurfaceView surface;
-
-    //private OnFragmentInteractionListener mListener;
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_stream, container, false);
 
         setRetainInstance(true);
-        surface = view.findViewById(R.id.surface);
-        holder = surface.getHolder();
+        text = view.findViewById(R.id.fragmentText);
+        text.setText("Before initialization");
+        // = view.findViewById(R.id.surface);
+        //  holder = surface.getHolder();
+        text.setText("After initialization");
 
         //if (MainActivity.video.getAutoplay())
-        startStream(); //Start stream if autoplay is enabled
+        //startStream(); //Start stream if autoplay is enabled
+        text.setText("Stream started");
         return view;
     }
-
-
-    /*@Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            //mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-    */
 
     /*private void setSize(int width, int height)
     {
@@ -145,7 +134,6 @@ public class Stream extends Fragment {
             Media m = new Media(libvlc, media);
             mMediaPlayer.setMedia(m);
             mMediaPlayer.play();
-
         }
         catch (Exception e)
         {
@@ -211,17 +199,5 @@ public class Stream extends Fragment {
                     break;
             }
         }
-    }
-
-    /*
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        //mListener = null;
-    }
-    */
-
-    public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(Uri uri);
     }
 }

@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     tools:context=".Stream">
 
-    <SurfaceView
+    <!--<SurfaceView
         android:id="@+id/surface"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
@@ -14,5 +14,10 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"/>
+-->
+    <TextView
+        android:id="@+id/fragmentText"
+        android:layout_width="match_parent"
+        android:layout_height="543dp" />
 
 </FrameLayout>
