@@ -27,7 +27,6 @@ public class Stream extends Fragment {
     private MediaPlayer mMediaPlayer = null;
     private int mVideoWidth;
     private int mVideoHeight;
-    TextView text;
 
     public final static String TAG = "Stream";
 
@@ -38,16 +37,17 @@ public class Stream extends Fragment {
         View view = inflater.inflate(R.layout.fragment_stream, container, false);
 
         setRetainInstance(true);
-        text = view.findViewById(R.id.fragmentText);
-        text.setText("Before initialization");
-        // = view.findViewById(R.id.surface);
-        //  holder = surface.getHolder();
-        text.setText("After initialization");
-
-        //if (MainActivity.video.getAutoplay())
-        //startStream(); //Start stream if autoplay is enabled
-        text.setText("Stream started");
+        surface = view.findViewById(R.id.surface);
+        holder = surface.getHolder();
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        //if (MainActivity.video.getAutoplay())
+        if (libvlc == null)
+            startStream(); //Start stream if autoplay is enabled
     }
 
     /*private void setSize(int width, int height)
@@ -118,7 +118,8 @@ public class Stream extends Fragment {
             options.add(":clock-jitter=0");
             options.add("clock-synchro=0");
 
-            libvlc = new LibVLC(this.getContext(), options);
+            libvlc = new LibVLC(getActivity(), options);
+
             holder.setKeepScreenOn(true);
 
             // Creating media player

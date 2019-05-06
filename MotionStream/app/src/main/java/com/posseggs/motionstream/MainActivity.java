@@ -50,7 +50,6 @@ public class MainActivity extends AppCompatActivity
     private static final String KEY_PUSH = "KEY_PUSH";
     public static final String DEF_URI = "rtmp://172.18.202.202:1935/live/test"; //Default path
 
-
     //MqttHelper for managing server-client messaging
     MqttHelper mqttHelper;
 
