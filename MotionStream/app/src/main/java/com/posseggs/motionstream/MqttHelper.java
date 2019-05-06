@@ -24,7 +24,7 @@ public class MqttHelper
         final String serverUri = "tcp://172.18.202.202:1883";
 
         final String clientId = "clientMsg";
-        final String subscriptionTopic = "msg/Stream";
+        final String subscriptionTopic = "stream";
 
         final String username = "admin";
         final String password = "password";

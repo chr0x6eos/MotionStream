@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.hardware.camera2.params.StreamConfigurationMap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -21,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
@@ -46,17 +48,9 @@ public class MainActivity extends AppCompatActivity
     private static final String KEY_PUSH = "KEY_PUSH";
     public static final String DEF_URI = "rtmp://172.18.202.202:1935/live/test"; //Default path
 
-    private SurfaceHolder holder;
-    private LibVLC libvlc = null;
-    private MediaPlayer mMediaPlayer = null;
-    private int mVideoWidth;
-    private int mVideoHeight;
-
-    SurfaceView surface;
 
     //MqttHelper for managing server-client messaging
     MqttHelper mqttHelper;
-
 
     public static Video video; //The video object will store all needed attributes
 
@@ -65,16 +59,12 @@ public class MainActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        surface = findViewById(R.id.surface);
-        holder = surface.getHolder();
 
         try
         {
             video = new Video();
             loadPreferences(); //Load from previous settings
             startMqtt(); //Start the mqtt service and listen for messages
-            if (video.getAutoplay())
-                startStream(); //Start stream if autoplay is enabled
         }
         catch (Exception ex)
         {
@@ -101,8 +91,8 @@ public class MainActivity extends AppCompatActivity
                 //For now not needed
                 String notificationMessage = mqttMessage.toString();
                 //if (notificationMessage == "Stream1")
-                showNotification("Attention: Motion has been detected!","Press here to access the stream!" +
-                        " MQTT message: " + notificationMessage);
+                showNotification("Attention: Motion has been detected!","Press here to access the stream!");
+                        //+ " MQTT message: " + notificationMessage);
             }
 
             @Override
@@ -132,7 +122,7 @@ public class MainActivity extends AppCompatActivity
             if (resultCode == RESULT_OK)
             {
                 savePreferences();
-                startStream();
+
                 //Toast.makeText(this, video.getUri().toString(),Toast.LENGTH_LONG).show();
             }
             else
@@ -140,6 +130,11 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(this, "Applying settings was canceled!", Toast.LENGTH_LONG).show();
             }
         }
+    }
+
+    public void accessStream(View v)
+    {
+        //Stream stream = (Stream) getFragmentManager().findFragmentById(R.id.stream);
     }
 
     private void loadPreferences()
@@ -172,54 +167,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    //Functions for stream
-    public void startStream()
-    {
-        try
-        {
-            //Create the player to show stream
-            createPlayer(video.getUri());
-        }
-        catch (Exception ex)
-        {
-            Toast.makeText(this, ex.getMessage(),Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private void setSize(int width, int height)
-    {
-        mVideoWidth = width;
-        mVideoHeight = height;
-        if (mVideoWidth * mVideoHeight <= 1)
-            return;
-
-        if (holder == null || surface == null)
-            return;
-
-        int w = getWindow().getDecorView().getWidth();
-        int h = getWindow().getDecorView().getHeight();
-        boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
-        if (w > h && isPortrait || w < h && !isPortrait) {
-            int i = w;
-            w = h;
-            h = i;
-        }
-
-        float videoAR = (float) mVideoWidth / (float) mVideoHeight;
-        float screenAR = (float) w / (float) h;
-
-        if (screenAR < videoAR)
-            h = (int) (w / videoAR);
-        else
-            w = (int) (h * videoAR);
-
-        holder.setFixedSize(mVideoWidth, mVideoHeight);
-        ViewGroup.LayoutParams lp = surface.getLayoutParams();
-        lp.width = w;
-        lp.height = h;
-        surface.setLayoutParams(lp);
-        surface.invalidate();
-    }
 
     /*private void setOrientation()
     {
@@ -238,108 +185,6 @@ public class MainActivity extends AppCompatActivity
             holder.setFixedSize(h,w);
         }
     }*/
-
-    private void createPlayer(Uri media)
-    {
-        //Delete player if exists
-        releasePlayer();
-        try
-        {
-            // Create LibVLC
-            ArrayList<String> options = new ArrayList<>();
-
-            //Options for stream
-            options.add("--aout=opensles");
-            options.add("--audio-time-stretch"); // time stretching
-            options.add("-vvv"); // verbosity
-            options.add(":network-caching=100");
-            options.add(":clock-jitter=0");
-            options.add("clock-synchro=0");
-
-            libvlc = new LibVLC(this, options);
-            holder.setKeepScreenOn(true);
-
-            // Creating media player
-            mMediaPlayer = new MediaPlayer(libvlc);
-            mMediaPlayer.setEventListener(mPlayerListener);
-
-            // Setting up video output
-            final IVLCVout vout = mMediaPlayer.getVLCVout();
-            vout.setVideoView(surface);
-            //vout.addCallback(this);
-            vout.attachViews();
-
-            Media m = new Media(libvlc, media);
-            mMediaPlayer.setMedia(m);
-            mMediaPlayer.play();
-
-        }
-        catch (Exception e)
-        {
-            Toast.makeText(this, "Error in creating player!", Toast
-                    .LENGTH_LONG).show();
-        }
-    }
-
-    private void releasePlayer() {
-        if (libvlc == null)
-            return;
-        mMediaPlayer.stop();
-        final IVLCVout vout = mMediaPlayer.getVLCVout();
-        //vout.removeCallback(this);
-        vout.detachViews();
-        holder = null;
-        libvlc.release();
-        libvlc = null;
-
-        mVideoWidth = 0;
-        mVideoHeight = 0;
-    }
-
-    private MediaPlayer.EventListener mPlayerListener = new MyPlayerListener(this);
-
-    /*
-    public void onNewLayout(IVLCVout vout, int width, int height, int visibleWidth, int visibleHeight, int sarNum, int sarDen)
-    {
-        if (width * height == 0)
-            return;
-
-        // store video size
-        mVideoWidth = width;
-        mVideoHeight = height;
-        setSize(mVideoWidth, mVideoHeight);
-    }
-    */
-
-    private static class MyPlayerListener implements MediaPlayer.EventListener {
-        private WeakReference<MainActivity> mOwner;
-
-        public MyPlayerListener(MainActivity owner) {
-            mOwner = new WeakReference<>(owner);
-        }
-
-        @Override
-        public void onEvent(MediaPlayer.Event event) {
-            MainActivity player = mOwner.get();
-
-            switch (event.type) {
-                case MediaPlayer.Event.EndReached:
-                    Log.d(TAG, "MediaPlayerEndReached");
-                    player.releasePlayer(); //Clear player when stream done
-                    break;
-                case MediaPlayer.Event.Playing:
-                    Log.d(TAG,"Playing stream");
-                case MediaPlayer.Event.Paused:
-                    Log.d(TAG,"Paused stream");
-                case MediaPlayer.Event.Stopped:
-                    Log.d(TAG,"Stopped stream");
-                    //player.releasePlayer(); //Clear player when stream stopped
-                    //break;
-                default:
-                    break;
-            }
-        }
-    }
 
     // Suppress Lint because of android studio bug: https://stackoverflow.com/questions/48131068/warning-must-be-one-of-notificationmanager-importance
     @SuppressLint("WrongConstant")
