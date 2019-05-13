@@ -36,9 +36,11 @@ public class Stream extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_stream, container, false);
 
+        //Make instance stay active when main activity dies
         setRetainInstance(true);
         surface = view.findViewById(R.id.surface);
         holder = surface.getHolder();
+        holder.setSizeFromLayout();
         return view;
     }
 
