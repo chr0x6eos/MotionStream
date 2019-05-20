@@ -25,6 +25,7 @@ public class MqttHelper
 
         final String clientId = "clientMsg";
         final String subscriptionTopic = "stream";
+        final String publishTopic = "app";
 
         final String username = "admin";
         final String password = "password";
@@ -95,6 +96,20 @@ public class MqttHelper
             catch (MqttException ex)
             {
                 ex.printStackTrace();
+            }
+        }
+
+        public void publish(String payload)
+        {
+            try
+            {
+                //Send input-string to server with the topic publishTopic
+                MqttMessage message = new MqttMessage(payload.getBytes());
+                mqttAndroidClient.publish(publishTopic, message);
+            }
+            catch (Exception ex)
+            {
+                Log.w(TAG,"Failed to publish message: " + payload + " to the topic: " + publishTopic + ".");
             }
         }
 

@@ -48,8 +48,10 @@ public class Stream extends Fragment {
     public void onStart() {
         super.onStart();
         //if (MainActivity.video.getAutoplay())
-        if (libvlc == null)
+        if (mMediaPlayer == null)
             startStream(); //Start stream if autoplay is enabled
+        else
+            restartPlayer();
     }
 
     /*private void setSize(int width, int height)
@@ -103,6 +105,24 @@ public class Stream extends Fragment {
         }
     }
 
+    private void restartPlayer()
+    {
+        Uri media = MainActivity.video.getUri();
+        // Creating media player
+        //mMediaPlayer = new MediaPlayer(libvlc);
+        //mMediaPlayer.setEventListener(mPlayerListener);
+
+        // Setting up video output
+        final IVLCVout vout = mMediaPlayer.getVLCVout();
+        vout.setVideoView(surface);
+        //vout.addCallback(this);
+        vout.attachViews();
+
+        Media m = new Media(libvlc, media);
+        mMediaPlayer.setMedia(m);
+        mMediaPlayer.play();
+    }
+
     private void createPlayer(Uri media)
     {
         //Delete player if exists
@@ -121,7 +141,7 @@ public class Stream extends Fragment {
             options.add("clock-synchro=0");
 
             libvlc = new LibVLC(getActivity(), options);
-
+            holder = surface.getHolder();
             holder.setKeepScreenOn(true);
 
             // Creating media player
@@ -188,7 +208,7 @@ public class Stream extends Fragment {
             switch (event.type) {
                 case MediaPlayer.Event.EndReached:
                     Log.d(TAG, "MediaPlayerEndReached");
-                    player.releasePlayer(); //Clear player when stream done
+                    //player.releasePlayer(); //Clear player when stream done
                     break;
                 case MediaPlayer.Event.Playing:
                     Log.d(TAG,"Playing stream");

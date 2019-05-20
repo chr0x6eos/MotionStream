@@ -8,8 +8,9 @@
         android:title="Settings"
         android:onClick="settings_OnClick"
         app:showAsAction="withText" />
+
     <item android:icon="@android:drawable/ic_menu_manage"
-        android:title="Notification"
-        android:onClick="notify_OnClick"
+        android:title="Show archive"
+        android:onClick="archive_OnClick"
         app:showAsAction="withText" />
 </menu>

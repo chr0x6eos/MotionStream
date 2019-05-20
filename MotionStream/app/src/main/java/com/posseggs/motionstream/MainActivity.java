@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity
     //Codes and identifiers
     public final static String TAG = "MainActivity";
     public static final int REQUEST_CODE_SETTINGS = 12318;
+    public static final int REQUEST_CODE_ARCHIVE = 21813;
     private static final String KEY_SP = "KEY_SP";
     private static final String KEY_URI = "KEY_URI";
     private static final String KEY_PLAY = "KEY_PLAY";
@@ -91,9 +92,10 @@ public class MainActivity extends AppCompatActivity
                 Log.w("Debug", mqttMessage.toString());
                 //For now not needed
                 String notificationMessage = mqttMessage.toString();
-                //if (notificationMessage == "Stream1")
-                showNotification("Attention: Motion has been detected!","Press here to access the stream!");
-                        //+ " MQTT message: " + notificationMessage);
+
+                    showNotification("Attention: Motion has been detected!", "Press here to access the stream!"//;
+                            + " MQTT message: " + notificationMessage);
+
             }
 
             @Override
@@ -114,6 +116,12 @@ public class MainActivity extends AppCompatActivity
         //Open settings activity
         Intent i = new Intent(this, SettingsActivity.class);
         startActivityForResult(i, REQUEST_CODE_SETTINGS);
+    }
+
+    public void archive_OnClick(MenuItem menu)
+    {
+        Intent i = new Intent(this, ArchiveActivity.class);
+        startActivityForResult(i, REQUEST_CODE_ARCHIVE);
     }
 
     @Override
@@ -218,8 +226,10 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /* Testing notifications
     public void notify_OnClick(MenuItem menuItem)
     {
         showNotification("Attention: Motion has been detected!","Press here to access the stream!");
     }
+    */
 }
