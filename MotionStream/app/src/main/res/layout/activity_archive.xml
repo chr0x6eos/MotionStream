@@ -6,8 +6,8 @@
     android:layout_height="match_parent"
     tools:context=".archive">
 
-    <TextView
-        android:id="@+id/textViewArchive"
+    <ListView
+        android:id="@+id/listViewArchive"
         android:layout_width="317dp"
         android:layout_height="563dp"
         android:layout_marginStart="8dp"

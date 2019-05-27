@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity
     public static final String DEF_URI = "rtmp://172.18.202.202:1935/live/test"; //Default path
 
     //MqttHelper for managing server-client messaging
-    MqttHelper mqttHelper;
+    static MqttHelper mqttHelper;
 
     public static Video video; //The video object will store all needed attributes
 
@@ -66,7 +66,8 @@ public class MainActivity extends AppCompatActivity
         {
             video = new Video();
             loadPreferences(); //Load from previous settings
-            startMqtt(); //Start the mqtt service and listen for messages
+            mqttHelper = new MqttHelper(this);
+            startMqtt();
         }
         catch (Exception ex)
         {
@@ -93,9 +94,10 @@ public class MainActivity extends AppCompatActivity
                 //For now not needed
                 String notificationMessage = mqttMessage.toString();
 
+                if (notificationMessage.contains("Notification")) {
                     showNotification("Attention: Motion has been detected!", "Press here to access the stream!"//;
                             + " MQTT message: " + notificationMessage);
-
+                }
             }
 
             @Override
@@ -105,7 +107,7 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    @Override
+        @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main,menu);
         return true;

@@ -48,10 +48,10 @@ public class Stream extends Fragment {
     public void onStart() {
         super.onStart();
         //if (MainActivity.video.getAutoplay())
-        if (mMediaPlayer == null)
+        //if (mMediaPlayer == null)
             startStream(); //Start stream if autoplay is enabled
-        else
-            restartPlayer();
+        //else
+        //    restartPlayer();
     }
 
     /*private void setSize(int width, int height)
