@@ -5,6 +5,11 @@
     <!--<item android:title="Stream" /> -->
     <item
         android:icon="@android:drawable/ic_menu_manage"
+        android:title="Invoke Stream"
+        android:onClick="invokeStream_OnClick"
+        app:showAsAction="withText"/>
+    <item
+        android:icon="@android:drawable/ic_menu_manage"
         android:title="Settings"
         android:onClick="settings_OnClick"
         app:showAsAction="withText" />

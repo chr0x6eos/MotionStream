@@ -120,6 +120,12 @@ public class MainActivity extends AppCompatActivity
         startActivityForResult(i, REQUEST_CODE_SETTINGS);
     }
 
+    //When pressed send msg to server to invoke stream
+    public void invokeStream_OnClick(MenuItem menu)
+    {
+        mqttHelper.publish("Start Stream");
+    }
+
     public void archive_OnClick(MenuItem menu)
     {
         Intent i = new Intent(this, ArchiveActivity.class);
