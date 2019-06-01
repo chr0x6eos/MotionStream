@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity
                 //For now not needed
                 String notificationMessage = mqttMessage.toString();
 
-                if (notificationMessage.contains("Notification")) {
+                if (notificationMessage.contains("Motion detected")) {
                     showNotification("Attention: Motion has been detected!", "Press here to access the stream!"//;
                             + " MQTT message: " + notificationMessage);
                 }
