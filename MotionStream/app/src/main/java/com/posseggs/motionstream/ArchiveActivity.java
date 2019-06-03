@@ -1,7 +1,6 @@
 package com.posseggs.motionstream;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -59,6 +58,10 @@ public class ArchiveActivity extends AppCompatActivity {
                 if (notificationMessage.contains("Motion detected")) {
                     showNotification("Attention: Motion has been detected!", "Press here to access the stream!"//;
                             + " MQTT message: " + notificationMessage);
+                }
+                else if(notificationMessage.contains("Error"))
+                {
+                    showNotification("Attention: Error occurred!", notificationMessage);
                 }
                 else if (notificationMessage.contains(".flv"))
                 {

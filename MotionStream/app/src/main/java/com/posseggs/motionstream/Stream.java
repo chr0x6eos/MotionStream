@@ -1,5 +1,6 @@
 package com.posseggs.motionstream;
 
+import android.app.ProgressDialog;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -9,7 +10,6 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import org.videolan.libvlc.IVLCVout;
 import org.videolan.libvlc.LibVLC;
@@ -31,6 +31,8 @@ public class Stream extends Fragment {
     public final static String TAG = "Stream";
 
     SurfaceView surface;
+
+    private ProgressDialog progress = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -179,6 +181,7 @@ public class Stream extends Fragment {
         mVideoHeight = 0;
     }
 
+
     private MediaPlayer.EventListener mPlayerListener = new MyPlayerListener(this);
 
     /*
@@ -194,7 +197,7 @@ public class Stream extends Fragment {
     }
     */
 
-    private static class MyPlayerListener implements MediaPlayer.EventListener {
+    private class MyPlayerListener implements MediaPlayer.EventListener {
         private WeakReference<Stream> mOwner;
 
         public MyPlayerListener(Stream owner) {
@@ -203,21 +206,21 @@ public class Stream extends Fragment {
 
         @Override
         public void onEvent(MediaPlayer.Event event) {
-            Stream player = mOwner.get();
-
             switch (event.type) {
                 case MediaPlayer.Event.EndReached:
                     Log.d(TAG, "MediaPlayerEndReached");
-                    //player.releasePlayer(); //Clear player when stream done
                     break;
                 case MediaPlayer.Event.Playing:
                     Log.d(TAG,"Playing stream");
+                    if (MainActivity.progress != null)
+                        MainActivity.progress.dismiss(); //Close loading dialog
+                    break;
                 case MediaPlayer.Event.Paused:
                     Log.d(TAG,"Paused stream");
+                    break;
                 case MediaPlayer.Event.Stopped:
                     Log.d(TAG,"Stopped stream");
-                    //player.releasePlayer(); //Clear player when stream stopped
-                    //break;
+                    break;
                 default:
                     break;
             }

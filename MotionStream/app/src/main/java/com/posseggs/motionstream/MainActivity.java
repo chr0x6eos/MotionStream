@@ -1,43 +1,27 @@
 package com.posseggs.motionstream;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
-import android.hardware.camera2.params.StreamConfigurationMap;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.videolan.libvlc.IVLCVout;
-import org.videolan.libvlc.LibVLC;
-import org.videolan.libvlc.Media;
-import org.videolan.libvlc.MediaPlayer;
-
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
 {
@@ -54,6 +38,7 @@ public class MainActivity extends AppCompatActivity
     //MqttHelper for managing server-client messaging
     static MqttHelper mqttHelper;
 
+    public static ProgressDialog progress = null;
     public static Video video; //The video object will store all needed attributes
 
     @Override
@@ -98,6 +83,15 @@ public class MainActivity extends AppCompatActivity
                     showNotification("Attention: Motion has been detected!", "Press here to access the stream!"//;
                             + " MQTT message: " + notificationMessage);
                 }
+                else if(notificationMessage.contains("Error"))
+                {
+                    showNotification("Attention: Error occurred!", notificationMessage);
+                }
+                else if (notificationMessage.contains("ended"))
+                {
+                    showNotification("Attention: Stream ended!", notificationMessage);
+                    showAlert("Stream ended!","The stream has ended now. It can be invoked again at the menu option \"Invoke stream\"");
+                }
             }
 
             @Override
@@ -105,6 +99,16 @@ public class MainActivity extends AppCompatActivity
 
             }
         });
+    }
+
+    public void showAlert(String title, String message)
+    {
+        new AlertDialog.Builder(getApplicationContext())
+                .setMessage(message)
+                .setTitle(title)
+                .setPositiveButton("OK", (DialogInterface dialog, int which) -> dialog.dismiss())
+                .create()
+                .show();
     }
 
         @Override
@@ -123,7 +127,8 @@ public class MainActivity extends AppCompatActivity
     //When pressed send msg to server to invoke stream
     public void invokeStream_OnClick(MenuItem menu)
     {
-        mqttHelper.publish("Start Stream");
+        mqttHelper.publish("Invoke");
+        loadingStream();
     }
 
     public void archive_OnClick(MenuItem menu)
@@ -149,9 +154,13 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void accessStream(View v)
+    private void loadingStream()
     {
-        //Stream stream = (Stream) getFragmentManager().findFragmentById(R.id.stream);
+        progress = new ProgressDialog(this);
+        progress.setTitle("Loading Stream");
+        progress.setMessage("Please wait while the stream is loading...");
+        progress.setCancelable(true);
+        progress.show();
     }
 
     private void loadPreferences()
@@ -184,25 +193,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
-    /*private void setOrientation()
-    {
-        //https://stackoverflow.com/questions/14858214/how-to-rotate-video-mp4-in-surfaceview
-
-        DisplayMetrics displaymetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-        int h = displaymetrics.heightPixels;
-        int w = displaymetrics.widthPixels;
-
-        holder = surface.getHolder();
-
-        if (w > h) {
-            holder.setFixedSize(w,h);
-        } else {
-            holder.setFixedSize(h,w);
-        }
-    }*/
-
     // Suppress Lint because of android studio bug: https://stackoverflow.com/questions/48131068/warning-must-be-one-of-notificationmanager-importance
     @SuppressLint("WrongConstant")
     //Showing push notifications
@@ -233,11 +223,4 @@ public class MainActivity extends AppCompatActivity
             mNotificationManager.notify(0, mBuilder.build());
         }
     }
-
-    /* Testing notifications
-    public void notify_OnClick(MenuItem menuItem)
-    {
-        showNotification("Attention: Motion has been detected!","Press here to access the stream!");
-    }
-    */
 }
